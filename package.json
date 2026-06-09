@@ -1,6 +1,6 @@
 {
   "name": "obsidian-front-matter-title",
-  "version": "3.13.1",
+  "version": "3.13.2",
   "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
   "main": "main.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "pretty": "prettier --write *.ts *.json src test --ignore-path package-lock.json"
   },
   "keywords": [],
-  "author": "snezhig",
+  "author": "danitt",
   "license": "MIT",
   "overrides": {
     "semver": ">=7.5.2"
