@@ -155,6 +155,8 @@ declare module "obsidian" {
     export abstract class MarkdownLeaf extends WorkspaceLeaf {
         tabHeaderInnerTitleEl: Element;
         view: MarkdownView;
+
+        updateHeader(): void;
     }
 
     export abstract class MetadataCacheExt extends MetadataCache {

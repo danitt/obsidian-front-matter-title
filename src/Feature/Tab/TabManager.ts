@@ -16,6 +16,7 @@ export default class TabManager extends AbstractManager {
     private readonly callback: () => void = null;
     private ref: ListenerRef<"layout:change">;
     private replacer: FunctionReplacer<WorkspaceLeaf, "setPinned", TabManager> = null;
+    private headerReplacer: FunctionReplacer<MarkdownLeaf, "updateHeader", TabManager> = null;
 
     constructor(
         @inject(SI["facade:obsidian"])
@@ -47,6 +48,9 @@ export default class TabManager extends AbstractManager {
     protected async doDisable(): Promise<void> {
         this.dispatcher.removeListener(this.ref);
         this.replacer?.disable();
+        this.headerReplacer?.disable();
+        this.replacer = null;
+        this.headerReplacer = null;
         this.ref = null;
         this.reset();
         this.enabled = false;
@@ -70,19 +74,27 @@ export default class TabManager extends AbstractManager {
 
     private initReplacer(): void {
         const leaf = this.facade.getActiveLeaf();
-        this.replacer = FunctionReplacer.create(
-            Object.getPrototypeOf(leaf),
-            "setPinned",
-            this,
-            function (self, [pinned], vanilla) {
-                const result = vanilla.call(this, pinned);
-                if (this?.view?.getViewType() === Leaves.MD) {
-                    self.innerUpdate(this.view.file.path);
-                }
-                return result;
+        const proto = Object.getPrototypeOf(leaf);
+        this.replacer = FunctionReplacer.create(proto, "setPinned", this, function (self, [pinned], vanilla) {
+            const result = vanilla.call(this, pinned);
+            if (this?.view?.getViewType() === Leaves.MD) {
+                self.innerUpdate(this.view.file.path);
             }
-        );
+            return result;
+        });
         this.replacer.enable();
+
+        // Obsidian re-renders the tab header title (reverting it to the file basename) via
+        // `updateHeader` on active-leaf-change, tab focus/blur and pin/unpin. Re-apply the
+        // resolved title right after the vanilla call so it does not flicker back to the basename.
+        this.headerReplacer = FunctionReplacer.create(proto, "updateHeader", this, function (self, args, vanilla) {
+            const result = vanilla.apply(this, args);
+            if (this?.view?.getViewType() === Leaves.MD && this.view.file) {
+                self.innerUpdate(this.view.file.path);
+            }
+            return result;
+        });
+        this.headerReplacer.enable();
     }
 
     private reset() {
