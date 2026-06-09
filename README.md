@@ -104,12 +104,14 @@ npx jest --testPathPattern=TabManager
 
 ## Loading the plugin in Obsidian during development
 
-The simplest approach is to symlink (or copy) the repository into your vault's plugin directory, then use watch mode so changes are picked up immediately.
+The simplest approach is to copy the repository into your vault's plugin directory, then use watch mode so changes are picked up immediately.
 
 **Symlink (macOS / Linux):**
 
 ```sh
-ln -s /path/to/obsidian-front-matter-title ~/.obsidian/plugins/obsidian-front-matter-title
+# Symlink
+npm run pack.local
+cp -r /path/to/obsidian-front-matter-title/dist ~/.obsidian/plugins/obsidian-front-matter-title
 ```
 
 Replace `~/.obsidian` with the path to your vault's `.obsidian` folder.
